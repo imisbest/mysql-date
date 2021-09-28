@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.csw.mysqldate.dao.UserDao">
+    <update id="updateCommit">
+        update user u
+        set u.commit =
+                case
+                    when DATE_FORMAT(now(), '%Y-%m-%d %T') &gt; DATE_FORMAT(u.create_time, '%Y-%m-%d %T') and
+                         DATE_FORMAT(now(), '%Y-%m-%d %T') &lt; DATE_FORMAT(u.end_time, '%Y-%m-%d %T')
+                        then '进行中'
+                    when DATE_FORMAT(now(), '%Y-%m-%d %T') &gt; DATE_FORMAT(u.end_time, '%Y-%m-%d %T')
+                        then '已经结束'
+                    when DATE_FORMAT(now(), '%Y-%m-%d %T') &lt; DATE_FORMAT(u.create_time, '%Y-%m-%d %T')
+                        then '还未开始'
+                    end,
+            u.aaa    =
+                case
+                    when DATE_FORMAT(now(), '%Y-%m-%d %T') &gt; DATE_FORMAT(u.create_time, '%Y-%m-%d %T') and
+                         DATE_FORMAT(now(), '%Y-%m-%d %T') &lt; DATE_FORMAT(u.end_time, '%Y-%m-%d %T')
+                        then '0'
+                    when DATE_FORMAT(now(), '%Y-%m-%d %T') &gt; DATE_FORMAT(u.end_time, '%Y-%m-%d %T')
+                        then '1'
+                    when DATE_FORMAT(now(), '%Y-%m-%d %T') &lt; DATE_FORMAT(u.create_time, '%Y-%m-%d %T')
+                        then '2'
+                    end
+
+
+    </update>
+
+
+    <select id="selectBY" resultType="com.csw.mysqldate.entity.User">
+        select u.id
+        from user u
+            /* where  u.end_time > u.create_time*/
+        WHERE DATE_FORMAT(SYSDATE(), '%Y-%m-%d %T') > DATE_FORMAT(u.create_time, '%Y-%m-%d %T')
+    </select>
+
+    <select id="selectBe" resultType="com.csw.mysqldate.entity.User">
+        SELECT u.id
+        FROM user u
+        WHERE /*DATE_SUB(CURDATE(), INTERVAL 2 DAY) &lt;= u.create_time*/
+        datediff(now(),u.create_time)&lt;=1
+    </select>
+    <select id="selectUserById" resultType="User">
+        SELECT u.id
+        FROM user u
+        WHERE u.id=#{uid}
+    </select>
+</mapper>
