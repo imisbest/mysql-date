@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import javax.persistence.Id;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -19,7 +18,7 @@ import java.util.Date;
 @TableName("user")
 public class User {
 
-    @TableId(value="ID", type= IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Integer id;
     @TableField("create_time")
     private Date createTime;

@@ -17,7 +17,7 @@ import java.util.Date;
 @Accessors(chain = true)
 @TableName("people")
 public class People {
- @TableId(value="ID", type= IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Integer id;
     @TableField("create_time")
     private Date createTime;

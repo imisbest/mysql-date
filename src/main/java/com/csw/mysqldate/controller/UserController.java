@@ -45,7 +45,7 @@ public class UserController {
     //get请求方式不推荐
     @RequestMapping("dx")
     public List<User> userTest(String num) {/*比较当前时间和数据库时间大小*/
-        System.out.println("num]"+num);
+        System.out.println("num]" + num);
         userDao.selectBe();
         return userDao.selectBY();
     }
@@ -53,7 +53,7 @@ public class UserController {
     //不推荐
     @PostMapping("dx2")
     public List<User> userTest2(@RequestBody String num) {/*比较当前时间和数据库时间大小*/
-        System.out.println("num]"+num);
+        System.out.println("num]" + num);
         userDao.selectBe();
         return userDao.selectBY();
     }
@@ -66,6 +66,7 @@ public class UserController {
         userDao.selectBe();
         return userDao.selectBY();
     }
+
     @RequestMapping("pg")
     public void update() {/*拿时间作比较，批量更新数据库*/
         userDao.updateCommit();

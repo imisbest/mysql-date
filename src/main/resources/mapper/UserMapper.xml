@@ -39,11 +39,11 @@
         SELECT u.id
         FROM user u
         WHERE /*DATE_SUB(CURDATE(), INTERVAL 2 DAY) &lt;= u.create_time*/
-        datediff(now(),u.create_time)&lt;=1
+            datediff(now(), u.create_time) &lt;= 1
     </select>
-    <select id="selectUserById" resultType="User">
+    <select id="selectUserById" resultType="com.csw.mysqldate.entity.User">
         SELECT u.id
         FROM user u
-        WHERE u.id=#{uid}
+        WHERE u.id = #{uid}
     </select>
 </mapper>

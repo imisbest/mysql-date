@@ -5,8 +5,8 @@ import com.csw.mysqldate.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
 import java.util.List;
+
 @Mapper
 public interface UserDao extends BaseMapper<User> {
     List<User> selectBY();

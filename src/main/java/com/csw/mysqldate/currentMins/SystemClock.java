@@ -27,6 +27,7 @@ class SystemClock {
 
     /**
      * 初始化单例
+     *
      * @return
      */
     private static SystemClock instance() {
@@ -35,6 +36,7 @@ class SystemClock {
 
     /**
      * 获取毫秒时间戳 替换System.currentTimeMillis()
+     *
      * @return
      */
     public static long currentTimeMillis() {

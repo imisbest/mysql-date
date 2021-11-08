@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan({"com.csw.mysqldate.dao","com.csw.mysqldate.interceptor"})
+@MapperScan({"com.csw.mysqldate.dao", "com.csw.mysqldate.interceptor"})
 public class MysqlDateApplication {
 
     public static void main(String[] args) {

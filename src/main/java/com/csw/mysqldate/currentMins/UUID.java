@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class UUID {//5-6秒
     private static final Logger logger = LoggerFactory.getLogger(UUID.class);
+
     public static void main(String[] args) {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
@@ -13,7 +14,7 @@ public class UUID {//5-6秒
             }
             long end = System.currentTimeMillis();
             long result = end - start;
-            logger.info("执行一千万次的执行时间为{}",result);
+            logger.info("执行一千万次的执行时间为{}", result);
         }
     }
 }
