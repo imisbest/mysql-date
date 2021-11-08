@@ -8,7 +8,7 @@ public class SystemCurrentMins {//30多毫秒
     public static void main(String[] args) {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 10000000; i++) {
+            for (int i = 0; i < Math.pow(10, 8); i++) {
                 System.currentTimeMillis();
             }
             long end = System.currentTimeMillis();

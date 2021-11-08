@@ -6,7 +6,10 @@ import com.csw.mysqldate.entity.People;
 import com.csw.mysqldate.entity.User;
 import com.csw.mysqldate.vo.RequestVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
@@ -70,6 +73,8 @@ public class UserController {
 
     @RequestMapping("ccc")
     public List<User> selectBe() {/*查找某个时间开始前几年，几天，几个小时*/
+
+
         System.out.println("aaa");
         return userDao.selectBe();
     }
