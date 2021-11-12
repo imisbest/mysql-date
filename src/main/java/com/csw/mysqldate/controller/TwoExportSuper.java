@@ -156,6 +156,18 @@ public class TwoExportSuper {
         }
     }
 
+    /**
+     * 破除255字符限制
+     *
+     * @param wk
+     * @param sheet
+     * @param nameList
+     * @param firstRow
+     * @param lastRow
+     * @param firstCol
+     * @param lastCol
+     * @param sheetName
+     */
     private static void initFgsIndustrydata(Workbook wk, Sheet sheet, String[] nameList, int firstRow, int lastRow, int firstCol, int lastCol, String sheetName) {
         Name namedCell = wk.createName();
         String nameName = sheetName + "xlk";
@@ -193,9 +205,7 @@ public class TwoExportSuper {
     }
 
     /**
-     * <p>
-     * Description: 设置下拉框到excel
-     * </p>
+     * 有255字符限制
      *
      * @param sheet
      * @param strs     下拉框中的值
