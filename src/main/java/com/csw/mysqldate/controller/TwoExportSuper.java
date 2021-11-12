@@ -182,8 +182,13 @@ public class TwoExportSuper {
         DataValidationConstraint dataValidationConstraint = dataValidationHelper.createFormulaListConstraint(nameName);//firstLevel
         //增加数据校验
         DataValidation provinceDataValidation = dataValidationHelper.createValidation(dataValidationConstraint, regions);
-        //验证
-        provinceDataValidation.createErrorBox("error", "请选择正确的渠道");
+        //处理Excel兼容性问题
+        if (provinceDataValidation instanceof XSSFDataValidation) {
+            provinceDataValidation.setSuppressDropDownArrow(true);
+            provinceDataValidation.setShowErrorBox(true);
+        } else {
+            provinceDataValidation.setSuppressDropDownArrow(false);
+        }
         sheet.addValidationData(provinceDataValidation);
     }
 
