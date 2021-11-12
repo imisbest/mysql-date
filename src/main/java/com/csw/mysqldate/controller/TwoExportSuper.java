@@ -3,6 +3,7 @@ package com.csw.mysqldate.controller;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -33,17 +34,22 @@ public class TwoExportSuper {
         Workbook workbook = new XSSFWorkbook();
 
         // 创建需要用户填写的sheet
-        XSSFSheet sheet = (XSSFSheet) workbook.createSheet("省市县");
-        Row row0 = sheet.createRow(0);
-        row0.createCell(5).setCellValue("渠道类型");
-        row0.createCell(6).setCellValue("渠道来源");
-
-
+        XSSFSheet sheetZS = (XSSFSheet) workbook.createSheet("省市县");
+        Row rowZS = sheetZS.createRow(0);
+        String[] titleZS = {"新下拉", "老下拉", "跟老动", "跟老展示", "跟新展示"};
+        Cell cellZS;
+        for (int i = 0; i < titleZS.length; i++) {
+            cellZS = rowZS.createCell(i + 4);
+            cellZS.setCellValue(titleZS[i]);
+        }
+        for (int i = 1; i < maxLine; i++) {
+            sheetZS.createRow(i);
+        }
         //得到第一级省名称，放在列表里
-        String[] firstLevel = {"字母", "数字"};
+        String[] firstXLK = {"字母", "数字"};
         //依次列出各省的市、各市的县
-        String[] ziMu = {"a", "b", "c"};
-        String[] shuZi = {"d", "d", "f"};
+        String[] ziMu = {"abcdefg", "hijklmn", "opq", "rst", "uvwxyz"};
+        String[] shuZi = {"12345", "金木水火土"};
         //将有子区域的父区域放到一个数组中
         String[] areaFatherNameArr = {"字母", "数字"};
         Map<String, String[]> areaMap = new HashMap<>();
@@ -52,78 +58,93 @@ public class TwoExportSuper {
 
         //创建一个专门用来存放地区信息的隐藏sheet页
         //因此也不能在现实页之前创建，否则无法隐藏。
-        Sheet area = workbook.createSheet("area");
+        String areaSheetName = "area";
+        Sheet areaSheet = workbook.createSheet(areaSheetName);
         //这一行作用是将此sheet隐藏，功能未完成时注释此行,可以查看隐藏sheet中信息是否正确
-        // workbook.setSheetHidden(workbook.getSheetIndex(area), true);
+        // workbook.setSheetHidden(workbook.getSheetIndex(areaSheetName), true);
 
         int rowId = 0;
         // 设置第一行，存省的信息
-        Row provinceRow = area.createRow(rowId++);
+        Row provinceRow = areaSheet.createRow(rowId++);
         provinceRow.createCell(0).setCellValue("渠道");
-        for (int i = 0; i < firstLevel.length; i++) {//firstLevel
+        for (int i = 0; i < firstXLK.length; i++) {//firstLevel
             Cell row2 = provinceRow.createCell(i + 1);
-            row2.setCellValue(firstLevel[i]);//firstLevel
+            row2.setCellValue(firstXLK[i]);//firstLevel
         }
         // 将具体的数据写入到每一行中，行开头为父级区域，后面是子区域。
         for (String key : areaFatherNameArr) {
             String[] son = areaMap.get(key);
-            Row row1 = area.createRow(rowId++);
+            Row row1 = areaSheet.createRow(rowId++);
             row1.createCell(0).setCellValue(key);
             for (int j = 0; j < son.length; j++) {
                 Cell cell0 = row1.createCell(j + 1);
                 cell0.setCellValue(son[j]);
             }
 
-            // 添加名称管理器
+            // 添加名称管理器,rowId从1开始
             String range = getRange(1, rowId, son.length);
             Name name = workbook.createName();
             //key不可重复
-            name.setNameName(key);
-            String formula = "area!" + range;
+            String fName = key;
+            String nName = fName.replace("（", "_").replace("(", "_");
+            String lName = nName.replace("）", "_").replace(")", "_");
+            name.setNameName(lName);
+            String formula = areaSheetName + "!" + range;
             name.setRefersToFormula(formula);
         }
+        /**
+         * 放入主表并设置有效性
+         */
+        setDropdownToExcel(sheetZS, firstXLK, 1, maxLine, 5, 5);
+        initFgsIndustrydata(workbook, sheetZS, firstXLK, 1, maxLine, 4, 4, areaSheetName);
         /**
          *拼接同步判断表达式
          */
         for (int i = 1; i < maxLine; i++) {
-            Row row7 = sheet.createRow(i);
-            //String ss = "VLOOKUP(F" + (i+1) + ",area!A2:B" + (firstLevel.length + 1) + ",2)";
-            Cell cell = row7.createCell(5);
-            //String aa=row7.getCell(5).toString();
-            //=IF(F4="","",IF(F4="数字",VLOOKUP(F4,数字,2),IF(F4="字母",VLOOKUP(F4,字母,2),"不知道")))
-            //String ss = "VLOOKUP(F" + (i+1) + ",area!A2:B" + (firstLevel.length + 1) + ",2)";
-            // String ss = "VLOOKUP(F" + (i+1) + "," + "F"+(i+1) + ",2)";
+            Row row7 = sheetZS.getRow(i);
             int j = i + 1;
-            String sStart = "IF(F" + j + "=\"\",\"\"";
-            for (int m = 0; m < areaFatherNameArr.length; m++) {
-                String n = areaFatherNameArr[m];
-                sStart += ",IF(F" + j + "=\"" + n + "\",VLOOKUP(F" + j + "," + n + ",2)";
+            String lineFF = "F";
+            String sStart = "IF(" + lineFF + j + "=\"\",\"\"";
+            for (String aa : areaFatherNameArr) {
+                String fName = aa;
+                String nName = fName.replace("（", "_").replace("(", "_");
+                String n = nName.replace("）", "_").replace(")", "_");
+                sStart += ",IF(" + lineFF + j + "=\"" + n + "\",VLOOKUP(" + lineFF + j + "," + n + ",1)";
             }
             sStart += ",\"不知道\"";
             for (int m = 0; m < areaFatherNameArr.length + 1; m++) {
                 sStart += ")";
             }
-
-            String length = "IF(F4=\"\",\"\",IF(F4=\"数字\",VLOOKUP(F4,数字,2),IF(F4=\"字母\",VLOOKUP(F4,字母,2),\"不知道\")))";
-            //String ss = "VLOOKUP(F" + (i+1) + ","+cell + ",2)";
+            //String length = "IF(F4=\"\",\"\",IF(F4=\"数字\",VLOOKUP(F4,数字,2),IF(F4=\"字母\",VLOOKUP(F4,字母,1),\"不知道\")))";
             row7.createCell(7).setCellFormula(sStart);
         }
-        XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
-        // 省规则
-        DataValidationConstraint provConstraint = dvHelper.createExplicitListConstraint(firstLevel);//firstLevel
-        // 四个参数分别是：起始行、终止行、起始列、终止列
-        CellRangeAddressList provRangeAddressList = new CellRangeAddressList(1, maxLine, 5, 5);
-        DataValidation provinceDataValidation = dvHelper.createValidation(provConstraint, provRangeAddressList);
-        //验证
-        provinceDataValidation.createErrorBox("error", "请选择正确的渠道");
-        provinceDataValidation.setShowErrorBox(true);
-        provinceDataValidation.setSuppressDropDownArrow(true);
-        sheet.addValidationData(provinceDataValidation);
-
-        //对前20行设置有效性
-        for (int i = 2; i < maxLine; i++) {
-            setDataValidation("F", sheet, i, 7);
+        /**
+         *拼接同步判断表达式
+         */
+        for (int i = 1; i < maxLine; i++) {
+            Row row7 = sheetZS.getRow(i);
+            int j = i + 1;
+            String lineFF = "E";
+            String sStart = "IF(" + lineFF + j + "=\"\",\"\"";
+            for (String aa : areaFatherNameArr) {
+                String fName = aa;
+                String nName = fName.replace("（", "_").replace("(", "_");
+                String n = nName.replace("）", "_").replace(")", "_");
+                sStart += ",IF(" + lineFF + j + "=\"" + n + "\",VLOOKUP(" + lineFF + j + "," + n + ",2)";
+            }
+            sStart += ",\"不知道\"";
+            for (int m = 0; m < areaFatherNameArr.length + 1; m++) {
+                sStart += ")";
+            }
+            //String length = "IF(F4=\"\",\"\",IF(F4=\"数字\",VLOOKUP(F4,数字,2),IF(F4=\"字母\",VLOOKUP(F4,字母,1),\"不知道\")))";
+            row7.createCell(8).setCellFormula(sStart);
         }
+
+        //二级联动设置有效性
+        for (int i = 2; i < maxLine; i++) {
+            setDataValidation("F", sheetZS, i, 7);
+        }
+
         FileOutputStream os = null;
         try {
             os = new FileOutputStream(filePath);
@@ -133,6 +154,25 @@ public class TwoExportSuper {
         } finally {
             IOUtils.closeQuietly(os);
         }
+    }
+
+    private static void initFgsIndustrydata(Workbook wk, Sheet sheet, String[] nameList, int firstRow, int lastRow, int firstCol, int lastCol, String sheetName) {
+        Name namedCell = wk.createName();
+        String nameName = sheetName + "xlk";
+        namedCell.setNameName(nameName);
+        //引用列，industry为上面创建一张隐藏掉sheet表,$A$2:$A$n,是此表中存放掉数据
+        String refersToFormula = sheetName + "!$A$2:$A$" + (nameList.length + 1);
+        namedCell.setRefersToFormula(refersToFormula);
+        // 四个参数分别是：起始行、终止行、起始列、终止列
+        CellRangeAddressList regions = new CellRangeAddressList(firstRow, lastRow, firstCol, lastCol);
+        DataValidationHelper dataValidationHelper = sheet.getDataValidationHelper();
+        //验证约束
+        DataValidationConstraint dataValidationConstraint = dataValidationHelper.createFormulaListConstraint(nameName);//firstLevel
+        //增加数据校验
+        DataValidation provinceDataValidation = dataValidationHelper.createValidation(dataValidationConstraint, regions);
+        //验证
+        provinceDataValidation.createErrorBox("error", "请选择正确的渠道");
+        sheet.addValidationData(provinceDataValidation);
     }
 
 
@@ -150,6 +190,35 @@ public class TwoExportSuper {
         data_validation_list = getDataValidationByFormula(
                 "INDIRECT($" + offset + (rowNum) + ")", rowNum, colNum, dvHelper);
         sheet.addValidationData(data_validation_list);
+    }
+
+    /**
+     * <p>
+     * Description: 设置下拉框到excel
+     * </p>
+     *
+     * @param sheet
+     * @param strs     下拉框中的值
+     * @param firstRow 下标
+     * @param lastRow
+     * @param firstCol
+     * @param lastCol
+     * @date 2020年1月6日 下午3:13:50
+     * @author ***
+     */
+    private static void setDropdownToExcel(Sheet sheet, String[] strs, int firstRow, int lastRow, int firstCol, int lastCol) {
+        CellRangeAddressList regions = new CellRangeAddressList(firstRow, lastRow, firstCol, lastCol);
+        DataValidationHelper dataValidationHelper = sheet.getDataValidationHelper();
+        DataValidationConstraint createExplicitListConstraint = dataValidationHelper.createExplicitListConstraint(strs);
+        DataValidation createValidation = dataValidationHelper.createValidation(createExplicitListConstraint, regions);
+        //处理Excel兼容性问题
+        if (createValidation instanceof XSSFDataValidation) {
+            createValidation.setSuppressDropDownArrow(true);
+            createValidation.setShowErrorBox(true);
+        } else {
+            createValidation.setSuppressDropDownArrow(false);
+        }
+        sheet.addValidationData(createValidation);
     }
 
     /**
